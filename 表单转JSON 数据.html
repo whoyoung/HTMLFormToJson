@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>配置工具</title>
+    <script>
+        function generateAndCopyJson() {
+            let es = document.getElementsByTagName("form")
+            var dict = {}
+            var form1 = null
+            for (let i = 0; i < es.length; i++) {
+                let element = es[i];
+                if (i == 0) {
+                    form1 = element
+                }
+                jsonDict(dict, element)
+            }
+            let copy = JSON.stringify(dict)
+
+            let exist = document.getElementById("addArea")
+            if (exist != null) {
+                exist.value = copy
+                exist.select();
+                if (document.execCommand('copy')) {
+                    document.execCommand('copy');
+                    alert('复制成功')
+                }
+            } else {
+                let div = document.createElement("div")
+                div.style.marginTop = "3%"
+                let area = document.createElement("textarea")
+                area.id = "addArea"
+                area.rows = "5"
+                area.cols = "50"
+                let content = document.createTextNode(copy)
+                area.appendChild(content)
+                div.appendChild(area)
+                form1.parentNode.insertBefore(div,form1)
+                area.select();
+                if (document.execCommand('copy')) {
+                    document.execCommand('copy');
+                    alert('复制成功')
+                }
+            }
+        }
+
+        function jsonDict(dict, f) {
+            var item = {}
+            dict[f.tabSelect.value] = item
+            let st = f.startTime.value
+            if (st != "") {
+                let replacedST = st.replaceAll("T"," ")
+                let sInterval = new Date(replacedST).getTime()
+                item["startTime"] = sInterval
+            }
+            let et = f.endTime.value
+            if (et != "") {
+                let replacedET = et.replaceAll("T"," ")
+                let sInterval = new Date(replacedET).getTime()
+                item["endTime"] = sInterval
+            }
+            var selected = {}
+            var normal = {}
+            item["selected"] = selected
+            item["normal"] = normal
+
+            let tabtype_sel = f.tabtype_sel.value
+            selected["tabtype"] = tabtype_sel
+            if (tabtype_sel == "image") {
+                selected["nightUrl"] = f.nightUrl_sel.value
+                selected["url"] = f.url_sel.value
+                selected["imageHeight"] = f.imageHeight_sel.value
+                selected["imageWidth"] = f.imageWidth_sel.value
+                selected["placeholderTitle"] = f.placeholderTitle_sel.value
+                selected["color"] = f.color_sel.value
+                selected["nightColor"] = f.nightColor_sel.value
+            } else {
+                selected["color"] = f.color_sel.value
+                selected["nightColor"] = f.nightColor_sel.value
+                selected["title"] = f.title_sel.value
+            }
+
+            let tabtype = f.tabtype.value
+            normal["tabtype"] = tabtype
+            if (tabtype == "image") {
+                normal["nightUrl"] = f.nightUrl.value
+                normal["url"] = f.url.value
+                normal["imageHeight"] = f.imageHeight.value
+                normal["imageWidth"] = f.imageWidth.value
+                normal["placeholderTitle"] = f.placeholderTitle.value
+                normal["color"] = f.color.value
+                normal["nightColor"] = f.nightColor.value
+            } else {
+                normal["color"] = f.color.value
+                normal["nightColor"] = f.nightColor.value
+                normal["title"] = f.title.value
+            }
+        }
+
+        function addForm() {
+            let f = document.getElementById("form_1")
+            let newF = f.cloneNode(true)
+            newF.id = ""
+            // let btn = document.createElement("button")
+            // btn.style.marginTop = "3%"
+            // btn.innerHTML = "删除此表单"
+            // btn.onclick = "deleteForm()"
+            // newF.appendChild(btn)
+            f.parentNode.appendChild(newF)
+        }
+
+        function urlCheck(value) {
+            let regx = "(https?|ftp|file)://[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]"
+            let re = new RegExp(regx)
+            if (value.length > 0 && re.test(value) == false) {
+                alert("url 格式错误,请检查链接")
+            }
+        }
+
+        function hexColorCheck(value) {
+            let regx = "^#([0-9a-fA-F]{6})$"
+            let re = new RegExp(regx)
+            if (value.length > 0 && re.test(value) == false) {
+                alert("色值格式错误,请检查色值。正确格式如:#000000")
+            }
+        }
+    </script>
+</head>
+
+<body style="padding: 20px;">
+    <button onclick="generateAndCopyJson()" >生成并复制 JSON 数据到剪切板</button> <button onclick="addForm()" id="addForm">添加表单</button>
+
+    <form action="" id="form_1" style="border: solid #ff0000; padding: 20px; margin-top: 20px;">
+        表单 id:
+        <select name="tabName" id="tabSelect">
+            <option value="9">体育</option>
+            <option value="12">娱乐</option>
+        </select>
+        <br> 开始时间：<input type="datetime-local" id="startTime" step="01"> <label for="optional" style="color: #837e7e; font-size: 12px;">非必填</label>
+        <br> 结束时间：<input type="datetime-local" id="endTime" step="01"> <label for="optional" style="color: #837e7e; font-size: 12px;">非必填</label>
+        <br>
+        <br> 
+        <label for="selStatus" style="color: #ff0000; font-size: 20px;">选中状态</label>
+        <br> tab 类型 :
+        <select name="tabType" id="tabtype_sel">
+            <option value="image">图片</option>
+            <option value="text">文字</option>
+        </select>
+        <br>夜间图片链接：<input type="url" id="nightUrl_sel" placeholder="图片类型时，必填 " style="width: 60%;" onblur="urlCheck(this.value)">
+        <br>日间图片链接：<input type="url" id="url_sel" placeholder="图片类型时，必填 " style="width: 60%; " onblur="urlCheck(this.value)">
+        <br>图片高度：<input type="number" id="imageHeight_sel" placeholder="图片类型时，必填 " value=15>
+        <br>图片宽度：<input type="number" id="imageWidth_sel" placeholder="图片类型时，必填 ">
+        <br>占位标题：<input type="text" id="placeholderTitle_sel" placeholder="图片类型时，必填 " style="width: 60%; ">
+        <br>夜间标题色值：<input type="text" id="color_sel" placeholder="必填。16进制色值，要带#。例如：#FFFFFF " style="width: 60%; " onblur="hexColorCheck(this.value)">
+        <br>日间标题色值：<input type="text" id="nightColor_sel" placeholder="必填。16进制色值，要带#。例如：#FFFFFF "
+            style="width: 60%;  " onblur="hexColorCheck(this.value)">
+        <div id="titleDiv">标题：<input type="text" id="title_sel" placeholder="文字类型时，必填 " style="width: 60%; "></div>
+        <br>
+        <br> 
+        <label for="selStatus" style="color: #ff0000; font-size: 20px;">未选中状态</label>
+        <br> tab 类型 :
+        <select name="tabType" id="tabtype">
+            <option value="image">图片</option>
+            <option value="text">文字</option>
+        </select>
+        <br>夜间图片链接：<input type="url" id="nightUrl" placeholder="图片类型时，必填 " style="width: 60%;" onblur="urlCheck(this.value)">
+        <br>日间图片链接：<input type="url" id="url" placeholder="图片类型时，必填 " style="width: 60%;" onblur="urlCheck(this.value)">
+        <br>图片高度：<input type="number" id="imageHeight" placeholder="图片类型时，必填 " value=15>
+        <br>图片宽度：<input type="number" id="imageWidth" placeholder="图片类型时，必填 ">
+        <br>占位标题：<input type="text" id="placeholderTitle" placeholder="图片类型时，必填 " style="width: 60%; ">
+        <br>夜间标题色值：<input type="text" id="color" placeholder="必填。16进制色值，要带#。例如：#FFFFFF " style="width: 60%; " onblur="hexColorCheck(this.value)">
+        <br>日间标题色值：<input type="text" id="nightColor" placeholder="必填。16进制色值，要带#。例如：#FFFFFF " style="width: 60%; " onblur="hexColorCheck(this.value)">
+        <div id="titleDiv">标题：<input type="text" id="title" placeholder="文字类型时，必填 " style="width: 60%; "></div>
+    </form>
+
+</body>
+
+</html>
